@@ -3,7 +3,7 @@
 
 export const SITE_TITLE = "Levent Anil Ozen";
 export const SITE_DESCRIPTION =
-  "Write about my technical journey. Mostly on web.";
+  "Write about my technical journey. Mostly about Web.";
 export const TWITTER_HANDLE = "@leventanilozen";
 export const MY_NAME = "Levent Anil Ozen";
 
