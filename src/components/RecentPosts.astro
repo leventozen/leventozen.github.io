@@ -1,0 +1,43 @@
+---
+import { readAll } from "../lib/markdoc/read";
+import { blog } from "../lib/markdoc/frontmatter.schema";
+
+// Fetch and sort blog posts
+const posts = await readAll({
+  directory: "blog",
+  frontmatterSchema: blog,
+});
+
+const recentPosts = posts
+  .filter((p) => p.frontmatter.draft !== true)
+  .sort(
+    (a, b) =>
+      new Date(b.frontmatter.date).valueOf() -
+      new Date(a.frontmatter.date).valueOf()
+  ).slice(0, 10);
+---
+
+<section>
+  <h1 class="text-1xl">Recent Blog Posts</h1>
+  <ul>
+    {
+      recentPosts.map((post) => {
+        const formattedDate = new Date(
+          post.frontmatter.date
+        ).toLocaleDateString("en-us", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+        return (
+          <li>
+            <a href={`/blog/${post.slug}`}>{post.frontmatter.title}</a>
+            <time datetime={post.frontmatter.date.toISOString()}>
+              {formattedDate}
+            </time>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
