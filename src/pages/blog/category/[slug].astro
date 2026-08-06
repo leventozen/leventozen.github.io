@@ -1,0 +1,57 @@
+---
+import { readAll } from "../../../lib/markdoc/read";
+import { blog } from "../../../lib/markdoc/frontmatter.schema";
+import {
+  getCategories,
+  getPostsByCategory,
+} from "../../../lib/taxonomy";
+import PageLayout from "../../../layouts/PageLayout.astro";
+import PageMeta from "../../../components/PageMeta.astro";
+import PostList from "../../../components/PostList.astro";
+import { SITE_TITLE } from "../../../config";
+
+export async function getStaticPaths() {
+  const posts = await readAll({
+    directory: "blog",
+    frontmatterSchema: blog,
+  });
+
+  return getCategories(posts).map((category) => ({
+    params: { slug: category.slug },
+    props: { label: category.label },
+  }));
+}
+
+const { slug } = Astro.params;
+const { label } = Astro.props;
+
+if (typeof slug !== "string") {
+  throw Error(`slug should be string. Received: ${slug}`);
+}
+
+const posts = await readAll({
+  directory: "blog",
+  frontmatterSchema: blog,
+});
+
+const filteredPosts = getPostsByCategory(posts, slug);
+const pageTitle = `${label} | ${SITE_TITLE}`;
+const pageDescription = `Posts in the ${label} category.`;
+---
+
+<PageLayout>
+  <PageMeta title={pageTitle} description={pageDescription} slot="meta" />
+  <section slot="main">
+    <h1 class="text-2xl font-semibold text-text-heading m-0 mb-1">
+      {label}
+    </h1>
+    <p class="text-text-muted text-sm m-0 mb-6">
+      {filteredPosts.length}
+      {filteredPosts.length === 1 ? "post" : "posts"} in this category
+    </p>
+    <PostList posts={filteredPosts} showTaxonomy={false} />
+    <p class="mt-8 text-sm text-text-muted">
+      <a href="/blog" class="unset hover:text-text-link">← All posts</a>
+    </p>
+  </section>
+</PageLayout>

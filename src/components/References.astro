@@ -1,0 +1,38 @@
+---
+export interface Props {
+  references?: Array<{
+    title: string;
+    url: string;
+    note?: string;
+  }>;
+}
+
+const { references = [] } = Astro.props;
+---
+
+{
+  references.length > 0 && (
+    <section class="not-prose mt-12 pt-8 border-t border-text-muted/20">
+      <h2 class="m-0 mb-4 text-lg font-semibold text-text-heading">
+        References
+      </h2>
+      <ol class="unset list-decimal pl-5 space-y-2 text-sm text-text-body">
+        {references.map((reference) => (
+          <li class="pl-1">
+            <a
+              href={reference.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="unset hover:text-text-link"
+            >
+              {reference.title}
+            </a>
+            {reference.note && (
+              <span class="text-text-muted"> — {reference.note}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}

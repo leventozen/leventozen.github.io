@@ -1,0 +1,22 @@
+---
+export interface Props {
+  series?: string;
+  seriesPart?: number;
+}
+
+const { series, seriesPart } = Astro.props;
+---
+
+{
+  series && (
+    <p class="m-0 mb-2 text-sm text-text-muted">
+      {typeof seriesPart === "number" ? (
+        <>
+          Part {seriesPart}
+          <span aria-hidden="true"> · </span>
+        </>
+      ) : null}
+      {series}
+    </p>
+  )
+}

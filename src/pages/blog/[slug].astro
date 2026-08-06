@@ -37,14 +37,31 @@ const ogImageAbsoluteUrl =
   frontmatter.external !== true && frontmatter.ogImagePath
     ? new URL(frontmatter.ogImagePath, SITE_URL).toString()
     : undefined;
+
+const seoTitle =
+  frontmatter.external !== true &&
+  frontmatter.series &&
+  frontmatter.seriesPart
+    ? `${frontmatter.series}, Part ${frontmatter.seriesPart}: ${frontmatter.title}`
+    : frontmatter.title;
 ---
 
-<ContentLayout title={frontmatter.title} date={frontmatter.date}>
+<ContentLayout
+  title={frontmatter.title}
+  date={frontmatter.date}
+  categories={frontmatter.categories}
+  tags={frontmatter.tags}
+  series={frontmatter.external ? undefined : frontmatter.series}
+  seriesPart={frontmatter.external ? undefined : frontmatter.seriesPart}
+  references={frontmatter.external ? [] : frontmatter.references}
+>
   <BlogPostMeta
-    title={frontmatter.title}
+    title={seoTitle}
     description={frontmatter.external ? undefined : frontmatter.description}
     publishDate={frontmatter.date.toISOString()}
     pagePath={`/blog/${slug}`}
+    categories={frontmatter.categories}
+    tags={frontmatter.tags}
     ogImageAbsoluteUrl={ogImageAbsoluteUrl}
     slot="meta"
   />

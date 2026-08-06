@@ -1,0 +1,43 @@
+---
+import { slugify } from "../lib/taxonomy";
+
+export interface Props {
+  categories?: string[];
+  tags?: string[];
+}
+
+const { categories = [], tags = [] } = Astro.props;
+const hasTaxonomy = categories.length > 0 || tags.length > 0;
+---
+
+{
+  hasTaxonomy && (
+    <div class="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-text-muted">
+      {categories.map((category, index) => (
+        <>
+          {index > 0 && <span aria-hidden="true">·</span>}
+          <a
+            href={`/blog/category/${slugify(category)}`}
+            class="unset hover:text-text-link"
+          >
+            {category}
+          </a>
+        </>
+      ))}
+      {categories.length > 0 && tags.length > 0 && (
+        <span aria-hidden="true">·</span>
+      )}
+      {tags.map((tag, index) => (
+        <>
+          {index > 0 && <span aria-hidden="true">·</span>}
+          <a
+            href={`/blog/tag/${slugify(tag)}`}
+            class="unset hover:text-text-link"
+          >
+            {tag}
+          </a>
+        </>
+      ))}
+    </div>
+  )
+}
