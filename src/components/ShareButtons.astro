@@ -1,0 +1,76 @@
+---
+export interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+const twitterHref = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+---
+
+<div
+  class="share-buttons flex items-center gap-3 text-sm text-text-muted"
+  data-share-url={url}
+  data-share-title={title}
+>
+  <span class="sr-only">Share</span>
+  <a
+    href={twitterHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="unset hover:text-text-link"
+    aria-label="Share on Twitter"
+  >
+    <i class="fa-brands fa-twitter" aria-hidden="true"></i>
+  </a>
+  <a
+    href={linkedinHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="unset hover:text-text-link"
+    aria-label="Share on LinkedIn"
+  >
+    <i class="fa-brands fa-linkedin-in" aria-hidden="true"></i>
+  </a>
+  <button
+    type="button"
+    class="unset hover:text-text-link copy-link-button"
+    aria-label="Copy link"
+  >
+    <i class="fa-solid fa-link" aria-hidden="true"></i>
+  </button>
+  <span class="copy-link-status sr-only" aria-live="polite"></span>
+</div>
+
+<script>
+  function initShareButtons() {
+    document.querySelectorAll(".share-buttons").forEach((root) => {
+      const button = root.querySelector(".copy-link-button");
+      const status = root.querySelector(".copy-link-status");
+      const url = root.getAttribute("data-share-url");
+
+      if (!(button instanceof HTMLButtonElement) || !url) return;
+
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(url);
+          if (status) status.textContent = "Link copied";
+          button.setAttribute("aria-label", "Link copied");
+          window.setTimeout(() => {
+            button.setAttribute("aria-label", "Copy link");
+            if (status) status.textContent = "";
+          }, 2000);
+        } catch {
+          window.prompt("Copy this link", url);
+        }
+      });
+    });
+  }
+
+  initShareButtons();
+  document.addEventListener("astro:page-load", initShareButtons);
+</script>

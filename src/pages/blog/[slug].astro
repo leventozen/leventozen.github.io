@@ -33,10 +33,13 @@ const { content, frontmatter } = await readOne({
   frontmatterSchema: blog,
 });
 
+const pagePath = `/blog/${slug}`;
+const pageUrl = new URL(pagePath, SITE_URL).toString();
+
 const ogImageAbsoluteUrl =
   frontmatter.external !== true && frontmatter.ogImagePath
     ? new URL(frontmatter.ogImagePath, SITE_URL).toString()
-    : undefined;
+    : `${SITE_URL}/images/og.png`;
 
 const seoTitle =
   frontmatter.external !== true &&
@@ -49,6 +52,7 @@ const seoTitle =
 <ContentLayout
   title={frontmatter.title}
   date={frontmatter.date}
+  pageUrl={pageUrl}
   categories={frontmatter.categories}
   tags={frontmatter.tags}
   series={frontmatter.external ? undefined : frontmatter.series}
@@ -59,10 +63,13 @@ const seoTitle =
     title={seoTitle}
     description={frontmatter.external ? undefined : frontmatter.description}
     publishDate={frontmatter.date.toISOString()}
-    pagePath={`/blog/${slug}`}
+    pagePath={pagePath}
     categories={frontmatter.categories}
     tags={frontmatter.tags}
     ogImageAbsoluteUrl={ogImageAbsoluteUrl}
+    ogImageAltText={seoTitle}
+    ogImageWidth={1200}
+    ogImageHeight={630}
     slot="meta"
   />
   <Renderer content={content} slot="content" />

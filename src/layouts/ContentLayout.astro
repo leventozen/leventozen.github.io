@@ -16,10 +16,12 @@ import Footer from "../components/Footer.astro";
 import PostTaxonomy from "../components/PostTaxonomy.astro";
 import SeriesLabel from "../components/SeriesLabel.astro";
 import References from "../components/References.astro";
+import ShareButtons from "../components/ShareButtons.astro";
 
 export interface Props {
   title: string;
   date: Date;
+  pageUrl?: string;
   categories?: string[];
   tags?: string[];
   series?: string;
@@ -34,6 +36,7 @@ export interface Props {
 const {
   title,
   date,
+  pageUrl,
   categories = [],
   tags = [],
   series,
@@ -72,8 +75,17 @@ const formattedDate = new Date(date).toLocaleDateString("en-us", {
         </div>
         <h1 class="m-0 mb-[0.25em]">{title}</h1>
         <div class="not-prose mb-[2em]">
-          <time class="block text-text-muted">{formattedDate}</time>
-          <PostTaxonomy categories={categories} tags={tags} />
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <time class="block text-text-muted">{formattedDate}</time>
+              <PostTaxonomy categories={categories} tags={tags} />
+            </div>
+            {
+              pageUrl && (
+                <ShareButtons url={pageUrl} title={title} />
+              )
+            }
+          </div>
         </div>
         <slot name="content" />
         <References references={references} />
