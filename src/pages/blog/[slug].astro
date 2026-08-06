@@ -39,7 +39,7 @@ const pageUrl = new URL(pagePath, SITE_URL).toString();
 const ogImageAbsoluteUrl =
   frontmatter.external !== true && frontmatter.ogImagePath
     ? new URL(frontmatter.ogImagePath, SITE_URL).toString()
-    : `${SITE_URL}/images/og.png`;
+    : `${SITE_URL}/images/og.jpg`;
 
 const seoTitle =
   frontmatter.external !== true &&
