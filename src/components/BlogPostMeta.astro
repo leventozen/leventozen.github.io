@@ -30,22 +30,28 @@ const {
   tags = [],
   ogImageAbsoluteUrl,
   ogImageAltText,
-  ogImageWidth,
-  ogImageHeight,
+  ogImageWidth = 1200,
+  ogImageHeight = 630,
 } = Astro.props;
 
 const keywords = [...categories, ...tags];
+const pageUrl = pagePath ? new URL(pagePath, SITE_URL).toString() : undefined;
+const resolvedOgImage =
+  ogImageAbsoluteUrl || `${SITE_URL}/images/og.png`;
+const resolvedOgImageAlt =
+  ogImageAltText || `Preview image for ${title || SITE_TITLE}`;
 
 const { meta, og, twitter } = getBlogPostMeta({
   title: title || SITE_TITLE,
   description: description || SITE_DESCRIPTION,
-  pageUrl: pagePath ? new URL(pagePath, SITE_URL).toString() : undefined,
+  canonicalUrl: pageUrl,
+  pageUrl,
   authorName: MY_NAME,
   publishDate,
   categories,
   tags,
-  ogImageAbsoluteUrl,
-  ogImageAltText,
+  ogImageAbsoluteUrl: resolvedOgImage,
+  ogImageAltText: resolvedOgImageAlt,
   ogImageWidth,
   ogImageHeight,
   siteOwnerTwitterHandle: TWITTER_HANDLE,
@@ -65,6 +71,8 @@ const { meta, og, twitter } = getBlogPostMeta({
 {og.description && <meta property="og:description" content={og.description} />}
 {og.type && <meta property="og:type" content={og.type} />}
 {og.url && <meta property="og:url" content={og.url} />}
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:locale" content="en_US" />
 {og.author && <meta property="article:author" content={og.author} />}
 {
   og.publishDate && (
@@ -92,6 +100,7 @@ const { meta, og, twitter } = getBlogPostMeta({
   )
 }
 <meta property="twitter:card" content="summary_large_image" />
+{pageUrl && <meta property="twitter:url" content={pageUrl} />}
 {twitter.image && <meta property="twitter:image" content={twitter.image} />}
 {
   twitter.imageAlt && (
