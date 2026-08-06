@@ -1,7 +1,6 @@
 ---
 import { readAll } from "../lib/markdoc/read";
 import { blog } from "../lib/markdoc/frontmatter.schema";
-import PostList from "./PostList.astro";
 
 const posts = await readAll({
   directory: "blog",
@@ -20,5 +19,39 @@ const recentPosts = posts
 
 <section>
   <h1 class="text-1xl">Recent Blog Posts</h1>
-  <PostList posts={recentPosts} />
+  <ul>
+    {
+      recentPosts.map((post) => {
+        const formattedDate = new Date(
+          post.frontmatter.date
+        ).toLocaleDateString("en-us", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+
+        if (post.frontmatter.external) {
+          return (
+            <li>
+              <a href={post.frontmatter.url} target="_blank">
+                {post.frontmatter.title}
+              </a>
+              <time datetime={post.frontmatter.date.toISOString()}>
+                {formattedDate}
+              </time>
+            </li>
+          );
+        }
+
+        return (
+          <li>
+            <a href={`/blog/${post.slug}`}>{post.frontmatter.title}</a>
+            <time datetime={post.frontmatter.date.toISOString()}>
+              {formattedDate}
+            </time>
+          </li>
+        );
+      })
+    }
+  </ul>
 </section>
