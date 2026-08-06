@@ -50,3 +50,11 @@
 .fa-twitter-square:before {
   content: "\f081";
 }
+
+.fa-linkedin-in:before {
+  content: "\f0e1";
+}
+
+.fa-linkedin:before {
+  content: "\f08c";
+}
