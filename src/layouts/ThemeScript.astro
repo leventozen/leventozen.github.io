@@ -5,23 +5,40 @@
 ---
 
 <script is:inline>
-  // figure out user's preferred theme and set it as html class for tailwind before paint
+  // Follow the system color scheme by default. A manual toggle can override it.
   (function () {
-    if (typeof window !== "undefined") {
-      const isSystemColorSchemeDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      const storageTheme = sessionStorage.getItem("theme");
-      if (!storageTheme && isSystemColorSchemeDark) {
-        document.documentElement.classList.add("dark");
-        document.head.children.namedItem("theme-color").content = "#0e141b";
-      } else if (storageTheme === "dark") {
-        document.documentElement.classList.add("dark");
-        document.head.children.namedItem("theme-color").content = "#0e141b";
+    if (typeof window === "undefined") return;
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function getPreferredTheme() {
+      const stored = sessionStorage.getItem("theme");
+      if (stored === "dark" || stored === "light") return stored;
+      return media.matches ? "dark" : "light";
+    }
+
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      const themeColor = document.head.querySelector('meta[name="theme-color"]');
+
+      if (theme === "dark") {
+        root.classList.add("dark");
+        root.classList.remove("light");
+        if (themeColor) themeColor.content = "#0e141b";
       } else {
-        // we already server render light theme
-        document.head.children.namedItem("theme-color").content = "#ffffff";
+        root.classList.remove("dark");
+        root.classList.add("light");
+        if (themeColor) themeColor.content = "#ffffff";
       }
     }
+
+    applyTheme(getPreferredTheme());
+
+    media.addEventListener("change", () => {
+      // Only track the OS theme while the user has not picked a manual override.
+      if (!sessionStorage.getItem("theme")) {
+        applyTheme(getPreferredTheme());
+      }
+    });
   })();
 </script>
