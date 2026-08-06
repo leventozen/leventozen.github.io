@@ -12,6 +12,8 @@ const baseSchema = z.object({
     invalid_type_error:
       "date must be written in yyyy-mm-dd format without quotes: For example, Jan 22, 2000 should be written as 2000-01-22.",
   }),
+  categories: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]),
 });
 
 /*
@@ -23,6 +25,18 @@ const baseSchema = z.object({
   If you don't want to link posts written in external websites, you could
   simplify this to just use the markdown schema.
 */
+const referenceSchema = z.object({
+  title: z.string({
+    required_error: "Each reference needs a title",
+    invalid_type_error: "reference title must be a string",
+  }),
+  url: z.string({
+    required_error: "Each reference needs a url",
+    invalid_type_error: "reference url must be a string",
+  }),
+  note: z.string().optional(),
+});
+
 export const blog = z.discriminatedUnion("external", [
   // markdown
   baseSchema.extend({
@@ -30,6 +44,9 @@ export const blog = z.discriminatedUnion("external", [
     description: z.optional(z.string()),
     ogImagePath: z.optional(z.string()),
     canonicalUrl: z.optional(z.string()),
+    series: z.string().optional(),
+    seriesPart: z.number().int().positive().optional(),
+    references: z.array(referenceSchema).default([]),
   }),
   // external link
   baseSchema.extend({

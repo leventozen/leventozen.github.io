@@ -1,0 +1,77 @@
+---
+import { slugify } from "../lib/taxonomy";
+
+export interface Props {
+  posts: Array<{
+    slug: string;
+    frontmatter: {
+      title: string;
+      date: Date;
+      external: boolean;
+      url?: string;
+      categories?: string[];
+      tags?: string[];
+    };
+  }>;
+  showTaxonomy?: boolean;
+}
+
+const { posts, showTaxonomy = true } = Astro.props;
+---
+
+<ul>
+  {
+    posts.map((post) => {
+      const formattedDate = new Date(post.frontmatter.date).toLocaleDateString(
+        "en-us",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }
+      );
+      const category = post.frontmatter.categories?.[0];
+
+      return (
+        <li class="grid grid-cols-[1fr] md:grid-cols-[1fr_auto] mb-3 md:gap-2 items-start">
+          <div class="title">
+            {post.frontmatter.external ? (
+              <a
+                href={post.frontmatter.url}
+                target="_blank"
+                class="unset hover:text-text-link"
+              >
+                <span>{post.frontmatter.title}</span>
+                <span>
+                  <i class="ml-1 mr-1 text-[12px] pb-2 fa-solid fa-up-right-from-square pt-1" />
+                </span>
+              </a>
+            ) : (
+              <a
+                href={`/blog/${post.slug}`}
+                class="unset hover:text-text-link"
+              >
+                {post.frontmatter.title}
+              </a>
+            )}
+            {showTaxonomy && category && (
+              <div class="mt-0.5 text-sm text-text-muted">
+                <a
+                  href={`/blog/category/${slugify(category)}`}
+                  class="unset hover:text-text-link"
+                >
+                  {category}
+                </a>
+              </div>
+            )}
+          </div>
+          <div class="text-text-muted text-sm italic">
+            <time datetime={post.frontmatter.date.toISOString()}>
+              {formattedDate}
+            </time>
+          </div>
+        </li>
+      );
+    })
+  }
+</ul>

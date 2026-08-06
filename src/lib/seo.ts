@@ -33,6 +33,8 @@ type BlogPostOgMeta = {
   author?: string; // post author name
   // siteName?: string; // page title
   publishDate: string; // ISO string
+  section?: string; // primary category
+  tags?: string[]; // article tags
   image?: string; // preview image
   imageAlt?: string; // alt text for preview image
   imageWidth?: string; // preview image width - 1200px standard
@@ -118,6 +120,8 @@ export function getBlogPostMeta({
   pageUrl,
   authorName,
   publishDate,
+  categories,
+  tags,
   ogImageAbsoluteUrl,
   ogImageAltText,
   ogImageWidth,
@@ -131,6 +135,8 @@ export function getBlogPostMeta({
   pageUrl?: string;
   authorName?: string;
   publishDate: string;
+  categories?: string[];
+  tags?: string[];
   ogImageAbsoluteUrl?: string; // should always be absolute
   ogImageAltText?: string;
   ogImageWidth?: number;
@@ -158,6 +164,8 @@ export function getBlogPostMeta({
     url: pageUrl,
     author: authorName,
     publishDate: publishDate,
+    section: categories?.[0],
+    tags,
     image: ogImageAbsoluteUrl,
     imageAlt: ogImageAltText,
     imageWidth: ogImageWidth ? String(ogImageWidth) : undefined,
