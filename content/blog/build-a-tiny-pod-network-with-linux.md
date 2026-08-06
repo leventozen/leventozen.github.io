@@ -127,6 +127,14 @@ Now let us inspect the interfaces inside the `pod-a` network namespace:
 sudo ip netns exec pod-a ip link
 ```
 
+You may also see the shorter form:
+
+```bash
+sudo ip -n pod-a link
+```
+
+It does the same thing here: runs the `ip link` command inside the `pod-a` network namespace. I will keep using `ip netns exec` for now because it makes the namespace boundary a little more explicit.
+
 You should see only the loopback interface:
 
 ```text
@@ -230,6 +238,10 @@ Create the bridge:
 ```bash
 sudo ip link add br0 type bridge
 ```
+
+One detail that can feel slightly confusing at first is that the bridge itself also appears as a network interface on the host.
+
+That is why we can bring `br0` up and assign an IP address to it just like we would with another interface. Its bridge ports, such as `veth-a-host`, are then attached underneath it.
 
 Bring it up:
 
@@ -467,6 +479,34 @@ Try the opposite direction too:
 sudo ip netns exec pod-b ping -c 3 10.10.0.2
 ```
 
+### If the ping does not work
+
+If you do not receive a reply, check the final state before changing the setup:
+
+```bash
+sudo ip -n pod-a addr
+sudo ip -n pod-b addr
+
+sudo ip -n pod-a link
+sudo ip -n pod-b link
+
+sudo ip -n pod-a route
+sudo ip -n pod-b route
+
+bridge link
+```
+
+Make sure that:
+
+- both addresses include the `/24` prefix
+- both `eth0` interfaces are up
+- both host-side veth interfaces are up and attached to `br0`
+- both network namespaces have a connected route for `10.10.0.0/24`
+
+Host firewall or nftables rules can also interfere with bridged traffic on some systems. If the interfaces, addresses, and routes all look correct, inspect the host firewall rules next.
+
+I would not recommend disabling the firewall blindly, especially outside a disposable learning environment.
+
 The two isolated network namespaces can now communicate with each other.
 
 There is no Kubernetes cluster here.
@@ -691,17 +731,22 @@ The scheduler decides which node should run the Pod.
 
 The kubelet on that node asks the container runtime to create the Pod sandbox.
 
-The runtime and CNI integration then handle the network setup. Depending on the implementation, the CNI plugin may:
+The runtime and CNI integration then handle the network setup.
+
+It helps to think of CNI as a contract rather than a particular networking technology. CNI defines how a runtime invokes networking plugins and how those plugins report the result. It does not require every plugin to build the network in the same way.
+
+What we have done manually is roughly the kind of work a CNI plugin may automate:
 
 - create a veth pair
 - move one end into the Pod network namespace
 - rename it to `eth0`
 - assign the Pod IP address
 - configure routes
-- connect the host side to a bridge
-- configure routing, encapsulation, policy, or eBPF programs
+- connect the host side to a bridge or another networking layer
+- bring the interfaces up
+- configure routing, encapsulation, policy, or eBPF programs when needed
 
-The exact setup depends on the CNI plugin.
+The runtime invokes the configured plugin when a Pod is added to or removed from the network. The actual network design is left to the plugin.
 
 A simple bridge-based plugin might create something close to what we built.
 
@@ -769,11 +814,13 @@ We have also not covered:
 - conntrack
 - cross-node MTU problems
 
-This is only the first layer.
+Our bridge solves the same-node part of the problem: two Pod-like network environments can reach each other directly on one Linux host.
 
-But it is an important one.
+The next layer is cluster-wide reachability. A Pod on one node must be able to reach a Pod on another node while preserving the Pod addressing model.
 
-Before trying to understand how a packet crosses nodes, it helps to understand how the packet leaves a Pod in the first place.
+That is where Linux routing, overlays, VXLAN, BGP, cloud routes, and different CNI implementations begin to matter.
+
+Before following a packet across nodes, though, it helps to understand how it leaves the Pod in the first place. That is the part we have built here.
 
 ## Cleaning everything up
 
