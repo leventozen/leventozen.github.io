@@ -42,13 +42,23 @@
       }
     }
   }
+
   function updateStorageTheme(mode: "light" | "dark") {
-    if (mode === "dark") {
-      sessionStorage.setItem("theme", "dark");
-    } else {
-      sessionStorage.setItem("theme", "light");
+    sessionStorage.setItem("theme", mode);
+  }
+
+  function syncToggleUI(
+    iconElem: Element,
+    mode: "light" | "dark",
+    animate = false
+  ) {
+    iconElem.classList.remove("light", "dark");
+    iconElem.classList.add(mode);
+    if (animate && !iconElem.classList.contains("duration-300")) {
+      iconElem.classList.add("duration-300");
     }
   }
+
   class ModeToggle extends HTMLElement {
     constructor() {
       super();
@@ -57,40 +67,26 @@
 
       const toggle = this.querySelector("button");
       const iconElem = toggle?.querySelector("#mode-circle");
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
 
       if (iconElem) {
-        // set the toggle mode based on the html classname set in ThemeScript.astro
-        if (currentMode === "dark") {
-          iconElem.classList.remove("light");
-          iconElem.classList.add("dark");
-        }
-
-        // we load the toggle invisible to prevent flash
-        // remove visibility class after setting initial dark/light class
+        syncToggleUI(iconElem, currentMode);
         iconElem.classList.remove("invisible");
 
-        // Each time the button is clicked, update the count.
         toggle?.addEventListener("click", () => {
-          if (currentMode === "dark") {
-            const modeToSwitch = "light";
-            iconElem.classList.remove("dark");
-            iconElem.classList.add("light");
-            updateHTMLTheme(modeToSwitch);
-            updateStorageTheme(modeToSwitch);
-            currentMode = modeToSwitch;
-          } else {
-            const modeToSwitch = "dark";
-            iconElem.classList.remove("light");
-            iconElem.classList.add("dark");
-            updateHTMLTheme(modeToSwitch);
-            updateStorageTheme(modeToSwitch);
-            currentMode = modeToSwitch;
-          }
+          const modeToSwitch = currentMode === "dark" ? "light" : "dark";
+          syncToggleUI(iconElem, modeToSwitch, true);
+          updateHTMLTheme(modeToSwitch);
+          updateStorageTheme(modeToSwitch);
+          currentMode = modeToSwitch;
+        });
 
-          // prevent slide animation on page load for dark mode
-          if (!iconElem.classList.contains("duration-300")) {
-            iconElem.classList.add("duration-300");
-          }
+        media.addEventListener("change", (event) => {
+          if (sessionStorage.getItem("theme")) return;
+          const modeToSwitch = event.matches ? "dark" : "light";
+          syncToggleUI(iconElem, modeToSwitch, true);
+          updateHTMLTheme(modeToSwitch);
+          currentMode = modeToSwitch;
         });
       }
     }
