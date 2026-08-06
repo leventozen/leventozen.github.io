@@ -37,7 +37,7 @@ const {
 const keywords = [...categories, ...tags];
 const pageUrl = pagePath ? new URL(pagePath, SITE_URL).toString() : undefined;
 const resolvedOgImage =
-  ogImageAbsoluteUrl || `${SITE_URL}/images/og.png`;
+  ogImageAbsoluteUrl || `${SITE_URL}/images/og.jpg`;
 const resolvedOgImageAlt =
   ogImageAltText || `Preview image for ${title || SITE_TITLE}`;
 
@@ -82,6 +82,8 @@ const { meta, og, twitter } = getBlogPostMeta({
 {og.section && <meta property="article:section" content={og.section} />}
 {og.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
 {og.image && <meta property="og:image" content={og.image} />}
+{og.image && <meta property="og:image:secure_url" content={og.image} />}
+{og.image && <meta property="og:image:type" content="image/jpeg" />}
 {og.imageAlt && <meta property="og:image:alt" content={og.imageAlt} />}
 {og.imageWidth && <meta property="og:image:width" content={og.imageWidth} />}
 {og.imageHeight && <meta property="og:image:height" content={og.imageHeight} />}
