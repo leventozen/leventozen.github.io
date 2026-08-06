@@ -33,7 +33,8 @@ const { content, frontmatter } = await readOne({
   frontmatterSchema: blog,
 });
 
-const pagePath = `/blog/${slug}`;
+// Keep the trailing slash so og:url/canonical match the live GitHub Pages URL.
+const pagePath = `/blog/${slug}/`;
 const pageUrl = new URL(pagePath, SITE_URL).toString();
 
 const ogImageAbsoluteUrl =
