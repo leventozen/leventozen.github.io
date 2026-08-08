@@ -1,4 +1,4 @@
-const WORDS_PER_MINUTE = 220;
+export const WORDS_PER_MINUTE = 180;
 
 export function getReadingTime(markdown: string): number {
   const prose = markdown

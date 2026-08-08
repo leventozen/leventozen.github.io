@@ -18,6 +18,7 @@ import SeriesLabel from "../components/SeriesLabel.astro";
 import References from "../components/References.astro";
 import ShareButtons from "../components/ShareButtons.astro";
 import PostNavigation from "../components/PostNavigation.astro";
+import { WORDS_PER_MINUTE } from "../lib/reading-time";
 
 export interface Props {
   title: string;
@@ -90,7 +91,12 @@ const formattedDate = new Date(date).toLocaleDateString("en-us", {
                   readingTime && (
                     <>
                       <span aria-hidden="true">·</span>
-                      <span>{readingTime} min read</span>
+                      <span
+                        class="cursor-help border-b border-dotted border-current"
+                        title={`Estimated at ${WORDS_PER_MINUTE} words per minute, excluding code blocks.`}
+                      >
+                        {readingTime} min read
+                      </span>
                     </>
                   )
                 }
