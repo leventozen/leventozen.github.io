@@ -52,15 +52,11 @@ But real networks rarely remain one large Ethernet segment forever.
 
 Imagine a company where employee devices belong to one network and internal servers belong to another. Or an application network that is kept separate from the database network.
 
-Machines inside each network can communicate through their own switches. The interesting problem begins when a machine in one network needs to reach a machine in the other.
-
-That is the next step for our tiny network.
+Machines inside each network can communicate through their own switches. Things get more interesting when a machine in one network needs to reach a machine in the other.
 
 We will place `pod-a` and `pod-b` in two separate subnets. Once we do that, they will no longer share the same local Ethernet network, and a bridge will not be enough to carry traffic directly between them.
 
-The packet will need to be handed to something connected to both networks, something that can inspect the destination IP address and decide where to send it next.
-
-That is the problem routing solves.
+The packet will need a router: something connected to both networks that can inspect the destination IP address and decide where to send it next.
 
 We will build that path ourselves, introducing gateways, routing tables, and IP forwarding as each one becomes necessary. Then we will extend the same network toward the internet, discover why an outbound route is not always enough, and introduce NAT and masquerading.
 
@@ -322,9 +318,7 @@ The result should look similar to this:
 ping: connect: Network is unreachable
 ```
 
-This is our first useful failure.
-
-`pod-a` knows how to reach its own subnet, but nothing beyond it.
+This failure is useful. `pod-a` knows how to reach its own subnet, but nothing beyond it.
 
 Inspect its routing table:
 
@@ -429,13 +423,7 @@ In a typical setup, however, you still will not receive a reply:
 2 packets transmitted, 0 received, 100% packet loss
 ```
 
-Something changed.
-
-Previously, `pod-a` refused to send the packet because it had no route.
-
-Now it has a route, so the packet reaches the Linux host.
-
-It just does not make it to the other network.
+We no longer fail inside `pod-a`. The packet reaches the Linux host, but it does not make it to the other network.
 
 ## Step 4: Find where the packet stops
 
@@ -503,19 +491,13 @@ Expected output:
 10.20.0.0/24 dev br-b proto kernel scope link src 10.20.0.1
 ```
 
-The host knows where both networks are.
-
-Why does it not pass the packet between them?
+The host knows where both networks are, but having routes is not enough by itself.
 
 ## Step 5: Turn the Linux host into a router
 
-We have reached the point where the word router becomes useful.
-
 `pod-a` and `pod-b` belong to different networks.
 
-Something connected to both networks needs to receive the packet from one side, inspect its destination IP address, and send it through the correct interface on the other side.
-
-That is what a router does.
+The Linux host is the only machine connected to both, so it has to route packets between them.
 
 In our lab, the Linux host is already connected to both networks:
 
@@ -583,11 +565,9 @@ Expected output:
 64 bytes from 10.20.0.2: icmp_seq=3 ttl=63 time=0.068 ms
 ```
 
-The TTL is now `63` rather than `64`.
+On a typical Linux setup, the reply now arrives with a TTL of `63` rather than `64`. That gives us another clue that the packet crossed a router, because a router decrements the TTL before forwarding it.
 
-That is another clue that the packet crossed a router. A router decrements the packet's TTL before forwarding it.
-
-Our complete path now works:
+The complete path now works:
 
 ```text
 pod-a
@@ -638,7 +618,7 @@ These rules are deliberately limited to the two bridges in our lab. Do not broad
 
 ## Step 6: Follow the routed packet
 
-Now that the ping works, let us look at what actually happened.
+With the ping working, let us follow the packet.
 
 The packet begins inside `pod-a`:
 
@@ -654,8 +634,6 @@ The destination does not match the local `10.10.0.0/24` route, so the default ro
 ```text
 default via 10.10.0.1 dev eth0
 ```
-
-There is an important detail here.
 
 `pod-a` does not use ARP to find the MAC address of `10.20.0.2`.
 
@@ -677,7 +655,7 @@ You should see something similar to:
 
 The MAC address will be different on your machine.
 
-At the first network boundary, the packet looks roughly like this:
+Before the host routes it, the packet looks roughly like this:
 
 ```text
 Ethernet source:      pod-a eth0 MAC
@@ -729,12 +707,12 @@ The Layer 2 addresses changed because the packet entered a different Ethernet ne
 
 The Layer 3 addresses stayed the same.
 
-That is the key idea behind routing:
+That is the key idea behind routing in this Ethernet lab:
 
 ```text
-The Ethernet frame changes at each network boundary.
+Each routed hop carries the IP packet inside a new Layer 2 frame.
 
-The IP packet continues toward the original destination.
+The source and destination IP addresses stay the same unless something such as NAT rewrites them.
 ```
 
 ## Step 7: Give pod-a internet access
@@ -808,13 +786,7 @@ In a typical environment, this will still fail:
 3 packets transmitted, 0 received, 100% packet loss
 ```
 
-We have a route.
-
-IP forwarding is enabled.
-
-The host knows how to send traffic toward the internet.
-
-So what is missing?
+The route setup looks complete: the namespace has a default route, IP forwarding is enabled, and the host knows how to send traffic toward the internet. The missing part is the return path.
 
 ## Step 8: Routing also needs a return path
 
@@ -843,9 +815,9 @@ external interface
 internet
 ```
 
-The outbound direction looks fine.
+Assuming the host firewall allows forwarding, the packet can reach the external interface.
 
-The problem is the source address:
+But it still has its original source address:
 
 ```text
 10.10.0.2
@@ -853,15 +825,11 @@ The problem is the source address:
 
 That address belongs to the private network we created inside the Linux host.
 
-The outside network does not know that `10.10.0.0/24` exists behind this machine.
-
-Even if the request reaches its destination, the reply still needs a route back to `10.10.0.2`.
-
-It probably does not have one.
+The host has a route out, but the upstream network does not know that `10.10.0.0/24` exists behind it. It may drop the packet because of the private source address, and even if the request reaches its destination, the reply still has no practical route back to `10.10.0.2`.
 
 Networking is not only about getting the packet to the destination. The return path must work too.
 
-We can observe the packet leaving with its original source address.
+We can observe the packet reaching the external interface with its original source address.
 
 Start a capture on the external interface:
 
@@ -881,9 +849,9 @@ Depending on your host firewall and upstream network, you may see:
 10.10.0.2 > 1.1.1.1: ICMP echo request
 ```
 
-The request leaves.
+The request reached the host's external interface.
 
-The reply just has no practical route back to our private network.
+That does not prove that it reached `1.1.1.1`; it only shows how far we can see from this host.
 
 ## Step 9: Add NAT and masquerading
 
@@ -917,6 +885,8 @@ sudo iptables -t nat -A POSTROUTING \
 ```
 
 `MASQUERADE` is useful when the external address may change, which is common with DHCP, virtual machines, laptops, and cloud instances.
+
+If the external address is fixed, an explicit `SNAT --to-source` rule is usually more appropriate.
 
 Inspect the rule:
 
@@ -1026,17 +996,11 @@ When the reply returns, Linux reverses the translation:
 1.1.1.1 → 10.10.0.2
 ```
 
-Linux keeps track of this state using conntrack.
-
-The namespace does not know its source address was changed.
-
-The remote destination does not know the packet originally came from `10.10.0.2`.
-
-The Linux host keeps the mapping between the two.
+Linux keeps track of this state using conntrack. The namespace does not know its source address was changed, and the remote destination only sees the host's external address.
 
 ## Three different packet paths
 
-We have now built three related but different paths.
+Put side by side, our three packet paths look like this.
 
 ### Same bridge
 
@@ -1056,7 +1020,7 @@ Both endpoints belong to the same subnet.
 
 The bridge forwards Ethernet frames.
 
-No gateway, IP forwarding, or NAT is required.
+No gateway, IP forwarding, or NAT is required for communication between these two endpoints.
 
 ### Different private networks
 
@@ -1074,7 +1038,7 @@ pod-b
 
 The endpoints belong to different subnets.
 
-Each side needs a route through a gateway.
+Each side needs a route to the other subnet. In this lab, that route goes through a gateway.
 
 The Linux host forwards IP packets between the networks.
 
@@ -1100,21 +1064,17 @@ The private subnet is not known to the outside network.
 
 The Linux host translates the source address so the reply can return through an address the upstream network already knows.
 
-| Scenario                              | Gateway needed | IP forwarding needed | NAT needed |
-| ------------------------------------- | -------------: | -------------------: | ---------: |
-| Same bridge and subnet                |             No |                   No |         No |
-| Different private subnets             |            Yes |                  Yes |         No |
-| Internet access from a private subnet |            Yes |                  Yes |    Usually |
+| Scenario                              | Explicit route or gateway needed | Host IP forwarding needed | NAT on this host needed |
+| ------------------------------------- | --------------------------------: | ------------------------: | ----------------------: |
+| Same bridge and subnet                |                 No, for this path |                        No |                      No |
+| Different private subnets             |                               Yes |                       Yes |                      No |
+| Internet access from a private subnet |                               Yes |                       Yes |        Yes, in this lab |
 
-NAT is not what makes routing happen.
-
-Routing decides where the packet should go.
-
-NAT changes addresses when the surrounding networks cannot route the original ones.
+Routing and SNAT solve different problems here. Routing decides where the packet should go. SNAT changes the source address so the reply can return through an address the upstream network can reach.
 
 ## How does this relate to Kubernetes nodes?
 
-We can now return to Kubernetes with a more useful mental model.
+The same model carries over to Kubernetes.
 
 Imagine a cluster with two nodes:
 
@@ -1171,30 +1131,35 @@ Node B local Pod network
 pod-b
 ```
 
-The packet can preserve its original Pod addresses:
+The packet preserves its original Pod addresses:
 
 ```text
 Source IP:      10.10.0.2
 Destination IP: 10.20.0.2
 ```
 
-This is conceptually similar to the two-subnet lab we built earlier.
+This matches the Kubernetes network model, where Pods are expected to communicate directly across nodes without NAT.
 
-The scale and implementation are different, but the central question is still the same:
+This is the same basic model as the two-subnet lab, only at a different scale and with a different implementation. The central question has not changed:
 
 > How does this machine know where the destination network lives?
 
 Static routes may be enough for a tiny lab.
 
-A real cluster, however, needs to preserve that reachability as nodes and Pods are added, removed, or moved. Somebody has to allocate Pod addresses, create interfaces, and keep the necessary network state up to date.
+They are only one possible implementation. A real Pod network may use routes, encapsulation, eBPF, or a combination of them to maintain that reachability as nodes and Pods are added, removed, or moved.
 
-That is where we will continue next.
-
-We now understand the Linux work that needs to happen. The next question is who actually performs it when Kubernetes creates or removes a Pod.
+Somebody still has to allocate Pod addresses, create interfaces, and keep the necessary network state up to date. Who performs that work when Kubernetes creates or removes a Pod is the subject of the next article.
 
 ## Cleaning everything up
 
 Only remove firewall rules that you actually added during the article.
+
+If you opened a new shell since Step 7, set `EXT_IF` again:
+
+```bash
+EXT_IF=$(ip route show default | awk '/default/ {print $5; exit}')
+echo "$EXT_IF"
+```
 
 Delete the NAT rule:
 
@@ -1273,18 +1238,16 @@ This time, we gave it somewhere else to go.
 
 We created two separate subnets, gave each namespace a gateway, enabled Linux to forward packets between them, and watched the Ethernet frame change while the IP packet kept its original source and destination.
 
-Then we sent the same packet toward the internet and ran into a different problem: the request had a route out, but the private source network had no usable route back. NAT solved that by translating the source address into one the outside network already knew how to reach.
+Then we sent the same packet toward the internet and ran into a different problem: the request had a route out, but the private source network had no usable route back. SNAT solved that by translating the source address into one the outside network already knew how to reach.
 
 The important distinction is simple:
 
 ```text
-Routing decides where a packet goes.
+Routing decides the packet's next hop and outgoing interface.
 
-NAT changes an address when the original one cannot be routed.
+In our internet path, SNAT changes the source address so the reply can return through an address the upstream network can reach.
 ```
 
 None of this is specific to Kubernetes. But the same questions appear as soon as Pods need to communicate across nodes or leave the cluster.
 
-We now understand the Linux side of that problem.
-
-Next, we can look at who actually builds and maintains the Pod network when Kubernetes creates or removes a Pod.
+The next article will look at who actually builds and maintains that Pod network.
