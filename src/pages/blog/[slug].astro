@@ -5,6 +5,7 @@ import Renderer from "../../components/Renderer.astro";
 import BlogPostMeta from "../../components/BlogPostMeta.astro";
 import ContentLayout from "../../layouts/ContentLayout.astro";
 import { SITE_URL } from "../../config";
+import { getReadingTime } from "../../lib/reading-time";
 
 export async function getStaticPaths() {
   const posts = await readAll({
@@ -27,11 +28,33 @@ if (typeof slug !== "string") {
   throw Error(`slug should be string. Received: ${slug}`);
 }
 
-const { content, frontmatter } = await readOne({
+const { content, rawContent, frontmatter } = await readOne({
   directory: "blog",
   slug,
   frontmatterSchema: blog,
 });
+
+const posts = (await readAll({
+  directory: "blog",
+  frontmatterSchema: blog,
+}))
+  .filter((post) => !post.frontmatter.draft && !post.frontmatter.external)
+  .sort(
+    (a, b) =>
+      new Date(b.frontmatter.date).valueOf() -
+      new Date(a.frontmatter.date).valueOf()
+  );
+
+const currentIndex = posts.findIndex((post) => post.slug === slug);
+const olderPost = currentIndex >= 0 ? posts[currentIndex + 1] : undefined;
+const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : undefined;
+const previousPost = olderPost
+  ? { slug: olderPost.slug, title: olderPost.frontmatter.title }
+  : undefined;
+const nextPost = newerPost
+  ? { slug: newerPost.slug, title: newerPost.frontmatter.title }
+  : undefined;
+const readingTime = getReadingTime(rawContent);
 
 // Keep the trailing slash so og:url/canonical match the live GitHub Pages URL.
 const pagePath = `/blog/${slug}/`;
@@ -53,7 +76,10 @@ const seoTitle =
 <ContentLayout
   title={frontmatter.title}
   date={frontmatter.date}
+  readingTime={readingTime}
   pageUrl={pageUrl}
+  previousPost={previousPost}
+  nextPost={nextPost}
   categories={frontmatter.categories}
   tags={frontmatter.tags}
   series={frontmatter.external ? undefined : frontmatter.series}

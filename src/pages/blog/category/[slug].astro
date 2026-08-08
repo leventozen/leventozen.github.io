@@ -40,7 +40,12 @@ const pageDescription = `Posts in the ${label} category.`;
 ---
 
 <PageLayout>
-  <PageMeta title={pageTitle} description={pageDescription} slot="meta" />
+  <PageMeta
+    title={pageTitle}
+    description={pageDescription}
+    pagePath={`/blog/category/${slug}/`}
+    slot="meta"
+  />
   <section slot="main">
     <h1 class="text-2xl font-semibold text-text-heading m-0 mb-1">
       {label}

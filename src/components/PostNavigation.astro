@@ -1,0 +1,45 @@
+---
+export interface PostLink {
+  slug: string;
+  title: string;
+}
+
+export interface Props {
+  previous?: PostLink;
+  next?: PostLink;
+}
+
+const { previous, next } = Astro.props;
+---
+
+{
+  (previous || next) && (
+    <nav
+      class="not-prose mt-12 pt-8 border-t border-text-muted/20 grid grid-cols-1 sm:grid-cols-2 gap-6"
+      aria-label="Post navigation"
+    >
+      <div>
+        {previous && (
+          <a
+            href={`/blog/${previous.slug}/`}
+            class="unset group block hover:text-text-link"
+          >
+            <span class="block text-sm text-text-muted">← Previous</span>
+            <span class="block mt-1">{previous.title}</span>
+          </a>
+        )}
+      </div>
+      <div class="sm:text-right">
+        {next && (
+          <a
+            href={`/blog/${next.slug}/`}
+            class="unset group block hover:text-text-link"
+          >
+            <span class="block text-sm text-text-muted">Next →</span>
+            <span class="block mt-1">{next.title}</span>
+          </a>
+        )}
+      </div>
+    </nav>
+  )
+}

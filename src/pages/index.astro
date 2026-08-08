@@ -3,11 +3,31 @@ import PageMeta from "../components/PageMeta.astro";
 import PageLayout from "../layouts/PageLayout.astro";
 import Intro from "../components/Intro.astro";
 import RecentPosts from "../components/RecentPosts.astro";
-import { SITE_TITLE } from "../config";
+import {
+  GITHUB_URL,
+  MY_NAME,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  SITE_URL,
+  TWITTER_URL,
+} from "../config";
+import { getHomeJsonLd } from "../lib/jsonld";
+
+const structuredData = getHomeJsonLd({
+  siteUrl: SITE_URL,
+  siteTitle: SITE_TITLE,
+  siteDescription: SITE_DESCRIPTION,
+  authorName: MY_NAME,
+  sameAs: [GITHUB_URL, TWITTER_URL],
+});
 ---
 
 <PageLayout>
-  <PageMeta title={`${SITE_TITLE}`} slot="meta" />
+  <PageMeta
+    title={SITE_TITLE}
+    structuredData={structuredData}
+    slot="meta"
+  />
   <Fragment slot="main">
     <Intro />
     <RecentPosts />
