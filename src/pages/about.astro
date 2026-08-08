@@ -1,0 +1,53 @@
+---
+import PageMeta from "../components/PageMeta.astro";
+import PageLayout from "../layouts/PageLayout.astro";
+import {
+  GITHUB_URL,
+  MY_NAME,
+  SITE_TITLE,
+  TWITTER_URL,
+} from "../config";
+
+const description =
+  "About Levent Anil Ozen, a software engineer writing about what he learns, builds, questions, and thinks about.";
+---
+
+<PageLayout>
+  <PageMeta
+    title={`About | ${SITE_TITLE}`}
+    description={description}
+    pagePath="/about/"
+    slot="meta"
+  />
+  <article class="prose max-w-none prose-sleek" slot="main">
+    <h1>About</h1>
+    <p>
+      I’m {MY_NAME}, a software engineer and a curious human being.
+    </p>
+    <p>
+      Over the years, I’ve worked on product infrastructure, developer tools,
+      observability platforms, distributed systems, and financial software. I
+      enjoy building things, but I’m equally interested in the decisions behind
+      them: why systems are designed in a certain way, where abstractions stop
+      being helpful, what breaks in practice, and what we learn when they do.
+    </p>
+    <p>
+      My interests often lead me toward distributed systems, infrastructure,
+      reliability, and the fundamentals beneath the tools we use. But this blog
+      is not only about technology. It is a place for things I learn, build,
+      question, and think about. These are shaped by my own experiences rather
+      than presented as final answers.
+    </p>
+    <p>
+      You can find my work on <a
+        href={GITHUB_URL}
+        target="_blank"
+        rel="me noopener noreferrer">GitHub</a
+      > and follow me on <a
+        href={TWITTER_URL}
+        target="_blank"
+        rel="me noopener noreferrer">Twitter</a
+      >.
+    </p>
+  </article>
+</PageLayout>

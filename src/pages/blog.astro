@@ -21,7 +21,12 @@ const sortedPosts = posts
 ---
 
 <PageLayout>
-  <PageMeta title={`Blog | ${SITE_TITLE}`} slot="meta" />
+  <PageMeta
+    title={`Blog | ${SITE_TITLE}`}
+    description="Technical articles about Kubernetes, Linux, networking, infrastructure, and software engineering."
+    pagePath="/blog/"
+    slot="meta"
+  />
   <section slot="main">
     <PostList posts={sortedPosts} />
   </section>

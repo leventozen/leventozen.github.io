@@ -1,0 +1,26 @@
+---
+import PageMeta from "../components/PageMeta.astro";
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE_TITLE } from "../config";
+---
+
+<PageLayout>
+  <PageMeta
+    title={`Page not found | ${SITE_TITLE}`}
+    description="The page you are looking for could not be found."
+    pagePath="/404.html"
+    noIndex={true}
+    slot="meta"
+  />
+  <section slot="main" class="pt-8">
+    <p class="text-sm text-text-muted m-0">404</p>
+    <h1 class="text-3xl text-text-heading mt-1 mb-3">Page not found</h1>
+    <p class="text-text-body">
+      The page may have moved, or the address may be incorrect.
+    </p>
+    <p class="flex gap-4 mt-6">
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+    </p>
+  </section>
+</PageLayout>

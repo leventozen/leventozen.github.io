@@ -68,6 +68,7 @@ export async function read<T extends z.ZodTypeAny>({
   return {
     slug: fileNameWithoutExtension,
     content: transformedContent,
+    rawContent: content,
     frontmatter: validatedFrontmatter,
   };
 }
