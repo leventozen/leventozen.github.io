@@ -1,6 +1,7 @@
 ---
 import HeaderLink from "./HeaderLink.astro";
 import DarkModeToggle from "./DarkModeToggle.astro";
+import { GITHUB_URL, TWITTER_URL } from "../config";
 ---
 
 <header>
@@ -24,7 +25,18 @@ import DarkModeToggle from "./DarkModeToggle.astro";
   >
     <a
       class="unset text-xl ml-4 hover:text-text-link"
-      href="https://twitter.com/leventdotdev"
+      href={GITHUB_URL}
+      target="_blank"
+      rel="me noopener noreferrer"
+    >
+      <i class="fa-brands fa-github" aria-hidden="true" title="On GitHub"></i>
+      <span class="fa-sr-only">On GitHub</span>
+    </a>
+    <a
+      class="unset text-xl ml-4 hover:text-text-link"
+      href={TWITTER_URL}
+      target="_blank"
+      rel="me noopener noreferrer"
     >
       <i
         class="fa-brands fa-twitter"

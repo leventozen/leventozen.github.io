@@ -6,6 +6,8 @@ export const SITE_DESCRIPTION =
   "a journey blending technical expertise with life's everyday wonders.";
 export const TWITTER_HANDLE = "@leventanilozen";
 export const MY_NAME = "Levent Anil Ozen";
+export const GITHUB_URL = "https://github.com/leventozen";
+export const TWITTER_URL = "https://twitter.com/leventdotdev";
 
 // setup in astro.config.mjs
 const BASE_URL = new URL(import.meta.env.SITE);
