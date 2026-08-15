@@ -11,6 +11,8 @@ export interface Props {
       url?: string;
       categories?: string[];
       tags?: string[];
+      series?: string;
+      seriesPart?: number;
     };
   }>;
   showTaxonomy?: boolean;
@@ -31,6 +33,8 @@ const { posts, showTaxonomy = true } = Astro.props;
         }
       );
       const category = post.frontmatter.categories?.[0];
+      const series = post.frontmatter.series;
+      const seriesPart = post.frontmatter.seriesPart;
 
       return (
         <li class="grid grid-cols-[1fr] md:grid-cols-[1fr_auto] mb-3 md:gap-2 items-start">
@@ -54,14 +58,39 @@ const { posts, showTaxonomy = true } = Astro.props;
                 {post.frontmatter.title}
               </a>
             )}
-            {showTaxonomy && category && (
+            {showTaxonomy && (series || category) && (
               <div class="mt-0.5 text-sm text-text-muted">
-                <a
-                  href={`/blog/category/${slugify(category)}`}
-                  class="unset hover:text-text-link"
-                >
-                  {category}
-                </a>
+                {series ? (
+                  <>
+                    {typeof seriesPart === "number" && (
+                      <>
+                        Part {seriesPart}
+                        <span aria-hidden="true"> · </span>
+                      </>
+                    )}
+                    {series}
+                    {category && (
+                      <>
+                        <span aria-hidden="true"> · </span>
+                        <a
+                          href={`/blog/category/${slugify(category)}`}
+                          class="unset hover:text-text-link"
+                        >
+                          {category}
+                        </a>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  category && (
+                    <a
+                      href={`/blog/category/${slugify(category)}`}
+                      class="unset hover:text-text-link"
+                    >
+                      {category}
+                    </a>
+                  )
+                )}
               </div>
             )}
           </div>

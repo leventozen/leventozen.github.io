@@ -4,7 +4,46 @@ import { Prism } from "@astrojs/prism";
 const { language, content } = Astro.props;
 ---
 
-<Prism lang={language} code={content} />
+<div class="code-block not-prose relative group my-4">
+  <button
+    type="button"
+    class="code-copy-button absolute top-2 right-2 z-10 rounded px-2 py-1 text-xs text-[#8da1b9] hover:text-[#e3eaf2] bg-[#0b121b]/80 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+    aria-label="Copy code"
+  >
+    Copy
+  </button>
+  <Prism lang={language} code={content} />
+</div>
+
+<script>
+  function initCodeCopyButtons() {
+    document.querySelectorAll(".code-copy-button").forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      if (button.dataset.copyReady === "true") return;
+      button.dataset.copyReady = "true";
+
+      button.addEventListener("click", async () => {
+        const root = button.closest(".code-block");
+        const code = root?.querySelector("pre")?.textContent ?? "";
+        try {
+          await navigator.clipboard.writeText(code);
+          const previous = button.textContent;
+          button.textContent = "Copied";
+          button.setAttribute("aria-label", "Copied");
+          window.setTimeout(() => {
+            button.textContent = previous || "Copy";
+            button.setAttribute("aria-label", "Copy code");
+          }, 1600);
+        } catch {
+          window.prompt("Copy this code", code);
+        }
+      });
+    });
+  }
+
+  initCodeCopyButtons();
+  document.addEventListener("astro:page-load", initCodeCopyButtons);
+</script>
 
 <style is:global>
   /**
