@@ -346,7 +346,7 @@ The configuration describes the network. The plugins have not applied it yet.
 Run:
 
 ```bash
-sudo CNI_PATH=/opt/cni/bin \
+sudo env CNI_PATH=/opt/cni/bin \
   cnitool add tiny-net /var/run/netns/pod-a
 ```
 
@@ -578,7 +578,7 @@ There is no `eth0`.
 Apply the same network configuration:
 
 ```bash
-sudo CNI_PATH=/opt/cni/bin \
+sudo env CNI_PATH=/opt/cni/bin \
   cnitool add tiny-net /var/run/netns/pod-b
 ```
 
@@ -685,7 +685,7 @@ eth0@if13        UP             10.10.0.3/24 ...
 Run:
 
 ```bash
-sudo CNI_PATH=/opt/cni/bin \
+sudo env CNI_PATH=/opt/cni/bin \
   cnitool del tiny-net /var/run/netns/pod-b
 ```
 
@@ -798,14 +798,14 @@ CNI gives the runtime a standard way to delegate network setup to plugins.
 Remove `pod-a` from the network:
 
 ```bash
-sudo CNI_PATH=/opt/cni/bin \
+sudo env CNI_PATH=/opt/cni/bin \
   cnitool del tiny-net /var/run/netns/pod-a
 ```
 
 If `pod-b` is still attached for any reason:
 
 ```bash
-sudo CNI_PATH=/opt/cni/bin \
+sudo env CNI_PATH=/opt/cni/bin \
   cnitool del tiny-net /var/run/netns/pod-b
 ```
 
