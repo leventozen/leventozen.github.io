@@ -51,8 +51,8 @@ export async function read<T extends z.ZodTypeAny>({
   schema: T;
 }) {
   const rawString = await fs.readFile(filepath, "utf8");
-  const { content, data: frontmatter } = matter(rawString);
-  const transformedContent = await parseAndTransform({ content });
+  const { content: rawContent, data: frontmatter } = matter(rawString);
+  const transformedContent = await parseAndTransform({ content: rawContent });
   const validatedFrontmatter = validateFrontmatter({
     frontmatter,
     schema,
@@ -68,7 +68,7 @@ export async function read<T extends z.ZodTypeAny>({
   return {
     slug: fileNameWithoutExtension,
     content: transformedContent,
-    rawContent: content,
+    rawContent,
     frontmatter: validatedFrontmatter,
   };
 }
