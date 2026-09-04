@@ -1,0 +1,6 @@
+PostgreSQL drill database:  NOT FOUND
+ClickHouse drill database:  NOT FOUND
+PostgreSQL app:             PRESENT
+ClickHouse analytics:       PRESENT
+
+Cleanup verification: PASS

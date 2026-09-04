@@ -1,0 +1,48 @@
+{
+  "scope_note": "This local lab validates the recovery procedure after backup retrieval. Object-storage availability, credentials, and retrieval are separate failure modes and are not tested here.",
+  "postgres": {
+    "database": "app",
+    "tables": [
+      "ingestion_checkpoints",
+      "orders",
+      "schema_migrations",
+      "shops",
+      "users"
+    ],
+    "shops_count": 100,
+    "users_count": 5000,
+    "orders_count": 250000,
+    "latest_migration": "20260401_create_ingestion_checkpoints",
+    "known_shop": {
+      "id": 1,
+      "name": "Shop 1",
+      "plan": "enterprise"
+    },
+    "min_order_timestamp": "2026-08-28 16:18:22+00",
+    "max_order_timestamp": "2026-09-04 16:18:22+00",
+    "ingestion_checkpoint": "offset:250000"
+  },
+  "clickhouse": {
+    "database": "analytics",
+    "tables": [
+      {
+        "name": "events",
+        "engine": "MergeTree"
+      },
+      {
+        "name": "events_daily",
+        "engine": "SummingMergeTree"
+      },
+      {
+        "name": "events_daily_mv",
+        "engine": "MaterializedView"
+      }
+    ],
+    "event_count": 2000000,
+    "min_timestamp": "2026-08-28T16:18:25Z",
+    "max_timestamp": "2026-09-04T16:18:28Z",
+    "daily_aggregate_top": "{\"day\":\"2026-09-04\",\"shop_id\":1,\"sum(event_count)\":\"1941\",\"sum(amount)\":1941}",
+    "materialized_view": "events_daily_mv",
+    "projection": "events_by_type"
+  }
+}

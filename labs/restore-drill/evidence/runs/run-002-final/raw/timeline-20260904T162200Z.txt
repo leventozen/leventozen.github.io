@@ -1,0 +1,10 @@
+2026-09-04T16:22:00Z checksum verification started
+2026-09-04T16:22:00Z checksum verification completed
+2026-09-04T16:22:00Z PostgreSQL restore started
+2026-09-04T16:22:01Z PostgreSQL restore completed rc=0 duration_ms=556
+2026-09-04T16:22:01Z ClickHouse restore started
+2026-09-04T16:22:01Z ClickHouse restore completed rc=0 duration_ms=186
+2026-09-04T16:22:01Z verification started
+2026-09-04T16:22:04Z verification completed duration_ms=2687
+2026-09-04T16:22:04Z cleanup started
+2026-09-04T16:22:05Z cleanup completed
