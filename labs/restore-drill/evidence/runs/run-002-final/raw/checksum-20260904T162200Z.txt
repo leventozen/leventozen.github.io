@@ -1,0 +1,2 @@
+postgres.dump: OK
+clickhouse/backup.zip: OK

@@ -1,0 +1,56 @@
+name: restore-drill
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: restore-drill-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "55432:5432"
+    volumes:
+      - restore_drill_pgdata:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./backups:/backups
+      - ./retrieved:/retrieved
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    container_name: restore-drill-clickhouse
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "58123:8123"
+      - "59000:9000"
+    volumes:
+      - restore_drill_chdata:/var/lib/clickhouse
+      - ./clickhouse/config.d/backup-disk.xml:/etc/clickhouse-server/config.d/backup-disk.xml:ro
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./backups:/var/lib/clickhouse/user_files/backups
+      - ./retrieved:/retrieved
+      - ./clickhouse/backup-disk:/var/lib/clickhouse/backups
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8123/ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  restore_drill_pgdata:
+    name: restore_drill_pgdata
+  restore_drill_chdata:
+    name: restore_drill_chdata

@@ -1,0 +1,155 @@
+{
+  "checks": [
+    {
+      "check": "PostgreSQL tables",
+      "expected": [
+        "ingestion_checkpoints",
+        "orders",
+        "schema_migrations",
+        "shops",
+        "users"
+      ],
+      "restored": [
+        "ingestion_checkpoints",
+        "orders",
+        "schema_migrations",
+        "shops",
+        "users"
+      ],
+      "result": "PASS"
+    },
+    {
+      "check": "PostgreSQL shops",
+      "expected": 100,
+      "restored": 100,
+      "result": "PASS"
+    },
+    {
+      "check": "PostgreSQL users",
+      "expected": 5000,
+      "restored": 5000,
+      "result": "PASS"
+    },
+    {
+      "check": "PostgreSQL orders",
+      "expected": 250000,
+      "restored": 250000,
+      "result": "PASS"
+    },
+    {
+      "check": "Latest migration",
+      "expected": "20260401_create_ingestion_checkpoints",
+      "restored": "20260401_create_ingestion_checkpoints",
+      "result": "PASS"
+    },
+    {
+      "check": "Known shop",
+      "expected": {
+        "id": 1,
+        "name": "Shop 1",
+        "plan": "enterprise"
+      },
+      "restored": {
+        "id": 1,
+        "name": "Shop 1",
+        "plan": "enterprise"
+      },
+      "result": "PASS"
+    },
+    {
+      "check": "Min order timestamp",
+      "expected": "2026-08-28 16:18:22+00",
+      "restored": "2026-08-28 16:18:22+00",
+      "result": "PASS"
+    },
+    {
+      "check": "Max order timestamp",
+      "expected": "2026-09-04 16:18:22+00",
+      "restored": "2026-09-04 16:18:22+00",
+      "result": "PASS"
+    },
+    {
+      "check": "Ingestion checkpoint",
+      "expected": "offset:250000",
+      "restored": "offset:250000",
+      "result": "PASS"
+    },
+    {
+      "check": "ClickHouse tables",
+      "expected": [
+        "events",
+        "events_daily",
+        "events_daily_mv"
+      ],
+      "restored": [
+        "events",
+        "events_daily",
+        "events_daily_mv"
+      ],
+      "result": "PASS"
+    },
+    {
+      "check": "ClickHouse event count",
+      "expected": 2000000,
+      "restored": 2000000,
+      "result": "PASS"
+    },
+    {
+      "check": "ClickHouse min timestamp",
+      "expected": "2026-08-28T16:August:25Z",
+      "restored": "2026-08-28T16:August:25Z",
+      "result": "PASS"
+    },
+    {
+      "check": "ClickHouse max timestamp",
+      "expected": "2026-09-04T16:September:28Z",
+      "restored": "2026-09-04T16:September:28Z",
+      "result": "PASS"
+    },
+    {
+      "check": "Daily aggregate top",
+      "expected": "{\"day\":\"2026-09-04\",\"shop_id\":1,\"sum(event_count)\":\"1941\",\"sum(amount)\":1941}",
+      "restored": "{\"day\":\"2026-09-04\",\"shop_id\":1,\"sum(event_count)\":\"1941\",\"sum(amount)\":1941}",
+      "result": "PASS"
+    },
+    {
+      "check": "Projection exists",
+      "expected": "PROJECTION events_by_type",
+      "restored": "present",
+      "result": "PASS"
+    },
+    {
+      "check": "Projection active parts rows",
+      "expected": ">0",
+      "restored": "300",
+      "result": "PASS"
+    },
+    {
+      "check": "Materialized view synthetic write",
+      "expected": "1",
+      "restored": "1",
+      "result": "PASS"
+    },
+    {
+      "check": "Application-shaped PG tenant lookup",
+      "expected": "Shop 1",
+      "restored": "Shop 1",
+      "result": "PASS",
+      "note": "Executed as postgres superuser; does not prove app role permissions."
+    },
+    {
+      "check": "Application-shaped PG tenant paid orders",
+      "expected": ">0",
+      "restored": "2500",
+      "result": "PASS",
+      "note": "Executed as postgres superuser; does not prove app role permissions."
+    }
+  ],
+  "high_water_marks": {
+    "postgres_max_order_timestamp": "2026-09-04 16:18:22+00",
+    "postgres_ingestion_checkpoint": "offset:250000",
+    "clickhouse_max_event_timestamp": "2026-09-04T16:September:28Z",
+    "timezone_note": "All recovery-point timestamps are normalized to UTC (Z). Naive ClickHouse DateTime strings must not be parsed as local time."
+  },
+  "permission_note": "PostgreSQL restore used --no-owner --no-privileges. This drill does not prove roles, ownership, GRANT/REVOKE, or app DB permissions."
+}
