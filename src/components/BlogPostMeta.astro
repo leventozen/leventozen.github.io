@@ -42,6 +42,9 @@ const keywords = [...categories, ...tags];
 const pageUrl = pagePath ? new URL(pagePath, SITE_URL).toString() : undefined;
 const resolvedOgImage =
   ogImageAbsoluteUrl || `${SITE_URL}/images/og.jpg`;
+const resolvedOgImageType = /\.png$/i.test(resolvedOgImage)
+  ? "image/png"
+  : "image/jpeg";
 const resolvedOgImageAlt =
   ogImageAltText || `Preview image for ${title || SITE_TITLE}`;
 
@@ -106,7 +109,7 @@ const structuredData =
 {og.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
 {og.image && <meta property="og:image" content={og.image} />}
 {og.image && <meta property="og:image:secure_url" content={og.image} />}
-{og.image && <meta property="og:image:type" content="image/jpeg" />}
+{og.image && <meta property="og:image:type" content={resolvedOgImageType} />}
 {og.imageAlt && <meta property="og:image:alt" content={og.imageAlt} />}
 {og.imageWidth && <meta property="og:image:width" content={og.imageWidth} />}
 {og.imageHeight && <meta property="og:image:height" content={og.imageHeight} />}

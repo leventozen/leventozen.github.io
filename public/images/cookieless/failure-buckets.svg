@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 372" role="img" aria-label="Every failure lands in one of three buckets" font-size="13" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect width="760" height="372" rx="12" fill="#ffffff"/>
+  <text x="24" y="30" font-size="15" font-weight="600" fill="#1f2937">Every failure lands in one of three buckets</text>
+  <g fill="none" stroke="#9ca3af" stroke-width="1.25">
+    <path d="M156 180H174" marker-end="url(#arrow)"/>
+    <path d="M250 224V266" marker-end="url(#arrow)"/>
+    <path d="M324 180H354" marker-end="url(#arrow)"/>
+    <path d="M430 136V106H534" marker-end="url(#arrow)"/>
+    <path d="M430 224V254H534" marker-end="url(#arrow)"/>
+  </g>
+  <rect x="24" y="156" width="132" height="48" rx="8" fill="none" stroke="#9ca3af" stroke-width="1.25"/>
+  <text x="90" y="184" text-anchor="middle" font-weight="600" fill="#1f2937">Something broke</text>
+  <polygon points="176,180 250,136 324,180 250,224" fill="none" stroke="#9ca3af" stroke-width="1.25"/>
+  <text text-anchor="middle" fill="#1f2937"><tspan x="250" y="176">Can it ever</tspan><tspan x="250" y="192">be placed?</tspan></text>
+  <polygon points="356,180 430,136 504,180 430,224" fill="none" stroke="#9ca3af" stroke-width="1.25"/>
+  <text text-anchor="middle" fill="#1f2937"><tspan x="430" y="176">Do we know</tspan><tspan x="430" y="192">the visitor?</tspan></text>
+  <rect x="150" y="268" width="200" height="72" rx="8" fill="#d97706" fill-opacity="0.12" stroke="#d97706" stroke-width="2"/>
+  <text x="162" y="292" font-weight="600" fill="#1f2937">Drop and count</text>
+  <text x="162" y="310" font-size="11.5" fill="#1f2937">stamped on an earlier day</text>
+  <text x="162" y="326" font-size="11.5" fill="#1f2937">no IP or User-Agent</text>
+  <rect x="536" y="70" width="200" height="72" rx="8" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-width="2"/>
+  <text x="548" y="94" font-weight="600" fill="#1f2937">Degrade, deterministically</text>
+  <text x="548" y="112" font-size="11.5" fill="#1f2937">session store down</text>
+  <text x="548" y="128" font-size="11.5" fill="#1f2937">late batch: 30-min slot id</text>
+  <rect x="536" y="218" width="200" height="72" rx="8" fill="#059669" fill-opacity="0.12" stroke="#059669" stroke-width="2"/>
+  <text x="548" y="242" font-weight="600" fill="#1f2937">Retry: 503</text>
+  <text x="548" y="260" font-size="11.5" fill="#1f2937">salt store unreachable</text>
+  <text x="548" y="276" font-size="11.5" fill="#1f2937">(a full queue is a 503 too)</text>
+  <text x="258" y="250" font-size="11.5" fill="#6b7280">no</text>
+  <text x="339" y="170" text-anchor="middle" font-size="11.5" fill="#6b7280">yes</text>
+  <text x="438" y="124" font-size="11.5" fill="#6b7280">yes</text>
+  <text x="438" y="244" font-size="11.5" fill="#6b7280">no</text>
+  <text x="536" y="332" font-size="12" font-weight="600" fill="#dc2626">Never: drop it quietly, reply 200</text>
+  <text x="744" y="360" text-anchor="end" font-size="10.5" fill="#9ca3af" opacity="0.8">levent.dev</text>
+</svg>
